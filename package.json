@@ -1,0 +1,20 @@
+{
+  "name": "react-calendar",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack --progress --colors --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "envify": "^1.2.0",
+    "react": "^0.12.1"
+  },
+  "devDependencies": {
+    "webpack": "^1.4.13",
+    "jsx-loader": "^0.12.2"
+  }
+}
