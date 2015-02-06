@@ -6,7 +6,6 @@ A simple calendar to try creating React components
 * `npm start`
 
 # Components
-- FilterableCalendar
 - CalendarContainer
 - SelectDate
 - CalendarMonth

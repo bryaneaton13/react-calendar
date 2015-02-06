@@ -2,6 +2,7 @@
 /* https://github.com/reactjs/sublime-react */
 var React = require('react');
 
+// Find out the max days for each month
 var getMax = function() {
     switch (this.month) {
         case 1:
@@ -20,7 +21,9 @@ var getMax = function() {
             return 30;
     }
 }
-var getMonth = function(month) {
+
+// Get the name of the month
+var getMonthName = function(month) {
     switch (month) {
         case 1:
             return "January";
@@ -60,14 +63,16 @@ var DateBox = React.createClass({
     }
 });
 
+// Create a calendar row
 var CalendarRow = React.createClass({
-    checkDate: function(year, month, day) {
+    // Check  if the date is today
+    isToday: function(year, month, day) {
         var d = new Date();
-        return (d.getFullYear() === year && d.getMonth()+1 === month && d.getDate() === day );
+        return (d.getFullYear() === year && d.getMonth()+1 === month && d.getDate() === day);
     },
     render: function() {
         var i,
-            days = [],
+            days = [], // Keep track of all the DateBoxes
             day,
             blanks = this.props.blanks || 0,
             start = this.props.start || 1,
@@ -87,7 +92,7 @@ var CalendarRow = React.createClass({
             days.push(<DateBox 
                         key={days.length} 
                         day={day} 
-                        today={this.checkDate(this.props.year, this.props.month, day)} />
+                        today={this.isToday(this.props.year, this.props.month, day)} />
             );
         }
         return (
@@ -98,14 +103,15 @@ var CalendarRow = React.createClass({
     }
 });
 
+// Create the CalendarMonth view
 var CalendarMonth = React.createClass({
     render: function() {
-        var weeks = [];
+        var weeks = []; // Put all the CalendarRows in here
         var start = this.props.start
         var blanks = (start-1)%7;
         var max;
         
-
+        // 
         weeks.push(
             <CalendarRow 
                 key={0} 
@@ -113,9 +119,11 @@ var CalendarMonth = React.createClass({
                 month={this.props.month}
                 year={this.props.year} />
         );
+        // Go through all 5 weeks and populate the rows
         for (i=0; i<5; i++) {
             start = (8-blanks)+(7*i);
             max = getMax.call(this.props);
+            // Don't render a row if it's past the max days for the month
             if (start > max) {
                 break;
             }
@@ -129,6 +137,7 @@ var CalendarMonth = React.createClass({
             );
             
         }
+        // Create a bootstrap table with borders and the days of the week
         return (
             <table className="table table-bordered">
                 <thead>
@@ -148,8 +157,9 @@ var CalendarMonth = React.createClass({
     }
 });
 
-
+// Create fields to change the month view
 var SelectDate = React.createClass({
+    // Use the current month and year as the starting value
     getInitialState: function() {
         var date = new Date();
         var month = date.getMonth()+1;
@@ -159,10 +169,13 @@ var SelectDate = React.createClass({
             initYear: year
         };
     },
+
+    // Stop the form from posting when submitted
     handleSubmit: function(e) {
         e.preventDefault();
     },
     
+    // Update the month and year when there is a valid selection
     handleChange: function() {
         if (this.refs.year.getDOMNode().value.length === 4) {
             this.props.onUserInput(
@@ -174,37 +187,41 @@ var SelectDate = React.createClass({
     render: function() {
         var options = [],
             i;
+        // Get all the month names based on the getMonth function
         for (i=1; i<=12; i++) {
-            options.push(<option key={i} value={i}>{getMonth(i)}</option>)
+            options.push(<option key={i} value={i}>{getMonthName(i)}</option>)
         }
         return (
-            <form onSubmit={this.handleSubmit}>
-                <select
-                    className="form-control" 
-                    defaultValue={this.props.month}
-                    ref="month"
-                    onChange={this.handleChange}>
-                    {options}
-                </select>
-                <input
-                    size="4"
-                    className="form-control" 
-                    type="text"
-                    placeholder="Year"
-                    defaultValue={this.props.year}
-                    ref="year"
-                    onChange={this.handleChange}
-                />
-            </form>
+            <div className="fields">
+                <form onSubmit={this.handleSubmit}>
+                    <select
+                        className="form-control" 
+                        defaultValue={this.props.month}
+                        ref="month"
+                        onChange={this.handleChange}>
+                        {options}
+                    </select>
+                    <input
+                        className="form-control" 
+                        type="text"
+                        placeholder="Year"
+                        defaultValue={this.props.year}
+                        ref="year"
+                        onChange={this.handleChange} />
+                </form>
+            </div>
         );
     }
 });
 
+// Create the Container for the entire calendar
 var CalendarContainer = React.createClass({
+    // Set the state to this month and get the day of the week
     getInitialState: function() {
         var date = new Date();
         date.setDate(1);
         var month = date.getMonth()+1;
+        // Get the day of the week
         var startDay = date.getDay()+1;
         var year = date.getFullYear();
         return {
@@ -214,9 +231,9 @@ var CalendarContainer = React.createClass({
         };
     },
 
+    // When user input comes in, update the state
     handleUserInput: function(year, month) {
         var startDay = new Date(year, month-1, 1).getDay()+1;
-
         this.setState({
             year: year,
             month: month,
@@ -225,20 +242,14 @@ var CalendarContainer = React.createClass({
     },
 
     render: function() {
-        var divStyle = {
-            textAlign: "center",
-            fontSize: "x-large",
-            padding: "5px",
-            maxWidth: "700px"
-        };
         return (     
             <div
-                style={divStyle}>       
+                className="calendar">       
                 <SelectDate
                     month={this.state.month}
                     year={this.state.year}
                     onUserInput={this.handleUserInput} />
-                <h3>{getMonth(this.state.month)}</h3>
+                <h3>{getMonthName(this.state.month)}</h3>
                 <CalendarMonth
                     month={this.state.month}
                     year={this.state.year}
@@ -251,15 +262,4 @@ var CalendarContainer = React.createClass({
 });
 
 
-var FilterableCalendar = React.createClass({
-
-    render: function() {
-        return (
-            <div>    
-                <CalendarContainer />
-            </div>
-        );
-    }
-});
-
-React.render(<FilterableCalendar />, document.body);
+React.render(<CalendarContainer />, document.body);
