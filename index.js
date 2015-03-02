@@ -423,7 +423,7 @@ var CalendarContainer = React.createClass({
                 </button>
                 <br />
                 {select}
-                <h4>
+                <h4 className="calendar-title">
                     <button 
                         onClick={this.prevMonth} 
                         className="btn btn-default">
