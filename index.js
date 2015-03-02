@@ -53,10 +53,29 @@ var getMonthName = function(month) {
 }
 
 var DateBox = React.createClass({
+
+    getInitialState: function() {
+        return {
+            selected: false
+        };
+    },
+
+    // Reset the 
+    componentWillReceiveProps: function() {
+        this.setState(this.getInitialState());
+    },
+
+    // TODO: emit event with the selected date
+    logDayClicked: function () {
+        this.setState({selected: !this.state.selected});
+        console.log('Day clicked', new Date(this.props.year, this.props.month-1, this.props.day));
+    },
+
     render: function() {
         return (
             <td 
-                className={this.props.today ? 'today' : ''}>
+                onClick={(this.props.day) ? this.logDayClicked : null}
+                className={(this.props.today ? 'today ' : '') + (this.state.selected ? 'selected' : '')}>
                 {this.props.day}
             </td>
         );
@@ -91,7 +110,9 @@ var CalendarRow = React.createClass({
 
             days.push(<DateBox 
                         key={days.length} 
-                        day={day} 
+                        day={day}
+                        month={this.props.month}
+                        year={this.props.year}
                         today={this.isToday(this.props.year, this.props.month, day)} />
             );
         }
@@ -117,11 +138,12 @@ var CalendarMonth = React.createClass({
         var blanks = (start-1)%7;
         var max;
 
-        var weekdays = this.days[this.props.size].map(function(d){
-            return <th>{d}</th>;
+        // Create all the headers for weekdays, give a key to each element
+        var weekdays = this.days[this.props.size].map(function(d, i){
+            return <th key={i}>{d}</th>;
         });
         
-        // 
+        // Create the first row of properties with the specified number of blanks
         weeks.push(
             <CalendarRow 
                 key={0} 
@@ -155,7 +177,9 @@ var CalendarMonth = React.createClass({
                        {weekdays}
                     </tr>
                 </thead>
-                <tbody>{weeks}</tbody>
+                <tbody>
+                    {weeks}
+                </tbody>
             </table>
         );
     }
@@ -197,30 +221,49 @@ var SelectDate = React.createClass({
         }
     },
     render: function() {
-        var options = [],
-            i;
-        // Get all the month names based on the getMonth function
-        for (i=1; i<=12; i++) {
-            options.push(<option key={i} value={i}>{getMonthName(i)}</option>)
-        }
+        // var options = [],
+            // i;
+        // // Get all the month names based on the getMonth function
+        // for (i=1; i<=12; i++) {
+            // options.push(<option key={i} value={i}>{getMonthName(i)}</option>)
+        // }
+        var options = [1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){
+            return (
+                <option 
+                    value={m}>
+                    {getMonthName(m)}
+                </option>
+            );
+        });
         return (
             <div className="fields">
-                <form onSubmit={this.handleSubmit}>
-                    <select
-                        className="form-control" 
-                        value={this.state.month}
-                        ref="month"
-                        onChange={this.handleChange}>
-                        {options}
-                    </select>
-                    <input
-                        className="form-control" 
-                        type="text"
-                        placeholder="Year"
-                        value={this.state.year}
-                        ref="year"
-                        onChange={this.handleChange} />
+                <form 
+                    onSubmit={this.handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="month">Month:</label>
+                        <select
+                            name="month"
+                            className="form-control" 
+                            value={this.state.month}
+                            ref="month"
+                            onChange={this.handleChange}>
+                            {options}
+                        </select>
+                        <label htmlFor="year">Year:</label>
+                        <input
+                            className="form-control" 
+                            type="text"
+                            placeholder="Year"
+                            value={this.state.year}
+                            ref="year"
+                            onChange={this.handleChange} />
+                        </div>
                 </form>
+                <button 
+                    onClick={this.props.onReset} 
+                    className="btn btn-success">
+                        Reset
+                </button>
             </div>
         );
     }
@@ -228,8 +271,10 @@ var SelectDate = React.createClass({
 
 // Create the Container for the entire calendar
 var CalendarContainer = React.createClass({
-    windowSmall: 200,
+    windowSmall: 350,
     windowLarge: 700,
+    changeSize: true,
+    validSizes: ["S","M","L"],
 
     // Set the state to this month and get the day of the week
     getInitialState: function() {
@@ -239,39 +284,51 @@ var CalendarContainer = React.createClass({
         // Get the day of the week
         var startDay = date.getDay()+1;
         var year = date.getFullYear();
-        var size = window.innerWidth;
+        var size = "M";
+        if (this.props.size && this.validSizes.indexOf(this.props.size) >= 0)
+        {
+            size = this.props.size;
+            this.changeSize = false;
+        }
         return {
             year: year,
             month: month,
             start: startDay,
-            size: "M"
+            size: size,
+            select: this.props.select
         };
     },
 
+    // Get the window size, "S","M","L"
     getWindowSize: function() {
         if (this.getDOMNode().offsetWidth <= this.windowSmall)
             return "S";
         else if (this.getDOMNode().offsetWidth >= this.windowLarge)
             return "L";
-        else 
-            return "M";
+        return "M";
     },
 
     handleResize: function(e) {
-        if (this.getWindowSize() != this.state.size)
-            this.setState({size: this.getWindowSize()});
+        var newSize = this.getWindowSize();
+        if (newSize != this.state.size)
+            this.setState({size: newSize});
     },
     componentDidMount: function() {
         window.addEventListener('keydown', this.keypress);
-        window.addEventListener('resize', this.handleResize);
-        this.setState({size: this.getWindowSize()});
+        if (this.changeSize) {
+            window.addEventListener('resize', this.handleResize);
+            this.setState({size: this.getWindowSize()});
+        }
     },
 
     componentWillUnMount: function() {
         window.removeEventListener('keydown', this.keypress);
-        window.removeEventListener('resize', this.handleResize);
+        if (this.changeSize) {
+            window.removeEventListener('resize', this.handleResize);
+        }
     },
 
+    // Handle the left and right arrow keys
     keypress: function (e) {
         if (e.keyCode === 37) {
             this.prevMonth();
@@ -283,12 +340,17 @@ var CalendarContainer = React.createClass({
 
     // When user input comes in, update the state
     handleUserInput: function(year, month) {
-        var startDay = new Date(year, month-1, 1).getDay()+1;
+        var startDay = this.getStartDay(year, month);
         this.setState({
             year: year,
             month: month,
             start: startDay
         });
+    },
+
+    // Get the day of the week that the month starts on
+    getStartDay: function(year, month) {
+        return new Date(year, month-1, 1).getDay()+1;
     },
 
     prevMonth: function() {
@@ -300,7 +362,7 @@ var CalendarContainer = React.createClass({
             month = 12;
         }
         newState.month = month;
-        newState.start = new Date(year, month-1, 1).getDay()+1;
+        newState.start = this.getStartDay(year, month);
         this.setState(newState);
     },
     nextMonth: function() {
@@ -312,42 +374,70 @@ var CalendarContainer = React.createClass({
             month = 1;
         }
         newState.month = month;
-        newState.start = new Date(year, month-1, 1).getDay()+1;
+        newState.start = this.getStartDay(year, month);
         this.setState(newState);
     },
 
     // Reset the state to today's date
     goToToday: function() {
-        this.replaceState(this.getInitialState());
+        var initState = this.getInitialState();
+        // Keep the select toggle status from the current state
+        initState.select = this.state.select;
+        if (this.changeSize) {
+            initState.size = this.getWindowSize();
+        }
+        this.setState(initState);
+    },
+    toggleSelect: function() {
+        this.setState({select: !this.state.select});
     },
 
     render: function() {
         var calendarClass = "calendar ";
-        calendarClass += (this.state.size === "S") ? "small" : (this.state.size === "L") ? "large" : "medium";
+        if (this.state.size === "S")
+            calendarClass += "small";
+        else if (this.state.size === "L")
+            calendarClass += "large";
+        else
+            calendarClass += "medium";
 
-        return (     
-            <div
-                className={"calendar "+this.state.size}>       
+        var select = '';
+        // If the property for select is open, create the select boxes
+        if (this.state.select !== false) {
+            select = (
                 <SelectDate
                     month={this.state.month}
                     year={this.state.year}
-                    onUserInput={this.handleUserInput} />
+                    onUserInput={this.handleUserInput}
+                    onReset={this.goToToday} />
+            );
+        }
+
+        return (     
+            <div
+                className={calendarClass}>
                 <button 
-                    onClick={this.prevMonth} 
+                    onClick={this.toggleSelect} 
                     className="btn btn-default">
-                        &lt;
+                        Toggle Select
                 </button>
-                <button 
-                    onClick={this.goToToday} 
-                    className="btn btn-success">
-                        Reset
-                </button>
-                <button 
-                    onClick={this.nextMonth} 
-                    className="btn btn-default">
-                        &gt;
-                </button>
-                <h3>{getMonthName(this.state.month) + " " + this.state.year}</h3>
+                <br />
+                {select}
+                <h4>
+                    <button 
+                        onClick={this.prevMonth} 
+                        className="btn btn-default">
+                            &lt;
+                    </button>
+                    <div className="monthName">
+                        {"  " + getMonthName(this.state.month) + " " + this.state.year + "  "}
+                    </div>
+                    <button 
+                        onClick={this.nextMonth} 
+                        className="btn btn-default">
+                            &gt;
+                    </button>
+                </h4>
                 <CalendarMonth
                     size={this.state.size}
                     month={this.state.month}
@@ -360,5 +450,7 @@ var CalendarContainer = React.createClass({
 
 });
 
-
-React.render(<CalendarContainer />, document.body);
+// You can set the size and the select toggle initial value
+// size="S/M/L"
+// select={true/false}
+React.render(<CalendarContainer select={false} />, document.body);

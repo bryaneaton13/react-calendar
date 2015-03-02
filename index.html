@@ -11,13 +11,23 @@
             text-align: center;
         }
         td {
+            cursor: pointer;
             font-size: large;
             min-width: 10%;
             text-align: center;
             vertical-align: middle;
             padding: 5px;
         }
+        .selected {
+            color: white;
+            background-color: blue;
+        }
+        .monthName {
+            display: inline-block;
+            width: 150px;
+        }
         .fields {
+            margin-top: 5px;
             margin-left: auto;
             margin-right: auto;
             width: 20%;
@@ -27,16 +37,15 @@
             margin-left: auto;
             margin-right: auto;
             width: 95%;
+            min-height: 95%;
             font-size: large;
             padding: 5px;
         }
         .calendar .small {
-            width: 0%;
             padding: 2px;
             min-width: 200px;
         }
         .calendar .medium {
-            width: 80%;
             min-width: 450px;
         }
         .calendar .large {
