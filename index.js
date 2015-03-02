@@ -221,12 +221,7 @@ var SelectDate = React.createClass({
         }
     },
     render: function() {
-        // var options = [],
-            // i;
-        // // Get all the month names based on the getMonth function
-        // for (i=1; i<=12; i++) {
-            // options.push(<option key={i} value={i}>{getMonthName(i)}</option>)
-        // }
+        // Create all the options for the months
         var options = [1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){
             return (
                 <option 
@@ -453,4 +448,6 @@ var CalendarContainer = React.createClass({
 // You can set the size and the select toggle initial value
 // size="S/M/L"
 // select={true/false}
-React.render(<CalendarContainer select={false} />, document.body);
+React.render(<CalendarContainer select={false} />, document.getElementById("cal"));
+React.render(<CalendarContainer select={false} />, document.getElementById("cal2"));
+React.render(<CalendarContainer select={false} />, document.getElementById("cal3"));

@@ -3,6 +3,9 @@
     <title>React Webpack template</title>
     <link rel="stylesheet" href="thirdparty/bootstrap.min.css" type="text/css" />
     <style>
+        * {
+            outline: none !importantnpm sta;
+        }
         body {
             padding-top: 50px;
         }
@@ -34,14 +37,13 @@
             margin-top: 5px;
             margin-left: auto;
             margin-right: auto;
-            width: 25%;
+            width: 30%;
         }
         .calendar {
             text-align: center;
             margin-left: auto;
             margin-right: auto;
             width: 95%;
-            min-height: 95%;
             font-size: large;
             padding: 5px;
         }
@@ -59,10 +61,26 @@
             color: white;
             background-color: black;
         }
+
+        #cal2 {
+            margin-left: auto;
+            margin-right: auto;
+            width: 700px;
+        }
+
+        #cal3 {
+            margin-left: auto;
+            margin-right: auto;
+            width: 300px;
+        }
     </style>
   </head>
   <body>
-    If you see this then something is wrong.
+    <div id="cal"></div>
+    <br />
+    <div id="cal2"></div>
+    <br />
+    <div id="cal3"></div>
     <script src="browser-bundle.js"></script>
   </body>
 </html>
