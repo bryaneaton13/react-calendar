@@ -75,7 +75,7 @@ var DateBox = React.createClass({
         return (
             <td 
                 onClick={(this.props.day) ? this.logDayClicked : null}
-                className={(this.props.today ? 'today ' : '') + (this.state.selected ? 'selected' : '')}>
+                className={(this.state.selected ? 'calendar-selected' : (this.props.today ? 'calendar-today ' : ''))}>
                 {this.props.day}
             </td>
         );
@@ -236,7 +236,7 @@ var SelectDate = React.createClass({
             );
         });
         return (
-            <div className="fields">
+            <div className="calendar-fields">
                 <form 
                     onSubmit={this.handleSubmit}>
                     <div className="form-group">
@@ -395,11 +395,11 @@ var CalendarContainer = React.createClass({
     render: function() {
         var calendarClass = "calendar ";
         if (this.state.size === "S")
-            calendarClass += "small";
+            calendarClass += "calendar-small";
         else if (this.state.size === "L")
-            calendarClass += "large";
+            calendarClass += "calendar-large";
         else
-            calendarClass += "medium";
+            calendarClass += "calendar-medium";
 
         var select = '';
         // If the property for select is open, create the select boxes
@@ -429,7 +429,7 @@ var CalendarContainer = React.createClass({
                         className="btn btn-default">
                             &lt;
                     </button>
-                    <div className="monthName">
+                    <div className="calendar-monthName">
                         {"  " + getMonthName(this.state.month) + " " + this.state.year + "  "}
                     </div>
                     <button 
